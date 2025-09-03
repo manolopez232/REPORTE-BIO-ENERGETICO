@@ -152,26 +152,27 @@
     });
 
     // Tercera reducción: agrupar en triadas y bajar sobrantes
-    const finalTriadas = [];
-    const leftovers = [];
-
-    for (let i = 0; i < secondReduced.length; i += 3) {
-      const group = secondReduced.slice(i, i + 3);
-      if (group.length === 3) {
-        const sum = group.reduce((a, b) => a + b, 0);
-        finalTriadas.push(sumDigits(sum));
-      } else {
-        leftovers.push(...group);
-      }
+    const thirdReduced = [];
+    let i = 0;
+    while (i + 2 < secondReduced.length) {
+      const sum = secondReduced[i] + secondReduced[i + 1] + secondReduced[i + 2];
+      thirdReduced.push(sumDigits(sum));
+      i += 3;
+    }
+    while (i < secondReduced.length) {
+      thirdReduced.push(secondReduced[i]);
+      i++;
     }
 
-    const curpFinal = [...finalTriadas, ...leftovers];
+    const curpFinal = thirdReduced;
 
     document.getElementById("result").textContent = `Tu CURP Energético es: ${curpFinal.join(', ')}`;
   }
 </script>
 
+
 </body>
 </html>
+
 
 
