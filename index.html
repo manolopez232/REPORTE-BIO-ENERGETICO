@@ -144,24 +144,28 @@
       return sumDigits(sum);
     });
 
-    // Segunda reducción: agrupar en triadas y reducir
-    const secondTriadas = reducedTriadas.join('').match(/.{1,3}/g) || [];
-    const secondReduced = secondTriadas.map(triada => {
-      const sum = triada.split('').reduce((a, b) => a + parseInt(b), 0);
-      return sumDigits(sum);
-    });
-
-    // Tercera reducción: agrupar en triadas y bajar sobrantes
-    const thirdReduced = [];
-    let i = 0;
-    while (i + 2 < secondReduced.length) {
-      const sum = secondReduced[i] + secondReduced[i + 1] + secondReduced[i + 2];
-      thirdReduced.push(sumDigits(sum));
-      i += 3;
+    // Segunda reducción: agrupar en bloques de 3 y reducir
+    const secondReduced = [];
+    for (let i = 0; i < reducedTriadas.length; i += 3) {
+      const group = reducedTriadas.slice(i, i + 3);
+      if (group.length === 3) {
+        const sum = group.reduce((a, b) => a + b, 0);
+        secondReduced.push(sumDigits(sum));
+      } else {
+        secondReduced.push(...group); // bajar sobrantes sin sumar
+      }
     }
-    while (i < secondReduced.length) {
-      thirdReduced.push(secondReduced[i]);
-      i++;
+
+    // Tercera reducción: misma lógica
+    const thirdReduced = [];
+    for (let i = 0; i < secondReduced.length; i += 3) {
+      const group = secondReduced.slice(i, i + 3);
+      if (group.length === 3) {
+        const sum = group.reduce((a, b) => a + b, 0);
+        thirdReduced.push(sumDigits(sum));
+      } else {
+        thirdReduced.push(...group); // bajar sobrantes sin sumar
+      }
     }
 
     const curpFinal = thirdReduced;
@@ -171,8 +175,11 @@
 </script>
 
 
+
+
 </body>
 </html>
+
 
 
 
