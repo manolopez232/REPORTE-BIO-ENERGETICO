@@ -1,199 +1,230 @@
-l<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>CURP Energético Matemático</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Montserrat', sans-serif;
-      background: linear-gradient(to right, #f0f4f8, #d9e2ec);
-      color: #333;
-      margin: 0;
-      padding: 2rem;
+    :root {
+      --text: #4b5563;
+      --bg: #e9eff5;
+      --card-bg: #ffffff;
+      --accent: #1f2937;
+      --radius: 16px;
+      --shadow: 0 10px 25px rgba(0,0,0,0.08);
+      --vibrant: #e63946;
     }
-    .container {
-      max-width: 600px;
-      margin: auto;
-      background: #fff;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    h1 {
-      text-align: center;
-      color: #2c3e50;
-    }
-    .image {
-      text-align: center;
-      margin-bottom: 1rem;
-    }
-    .image img {
-      width: 120px;
-      border-radius: 50%;
-    }
-    label {
-      display: block;
-      margin-top: 1rem;
-      font-weight: bold;
-    }
-    input {
-      width: 100%;
-      padding: 0.5rem;
-      margin-top: 0.3rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 1rem;
-    }
-    .date-group {
-      display: flex;
-      gap: 1rem;
-    }
-    .date-group input {
-      flex: 1;
-      text-align: center;
-    }
-    .button {
-      display: block;
-      width: 100%;
-      margin-top: 2rem;
-      padding: 0.8rem;
-      background-color: #3498db;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-    .button:hover {
-      background-color: #2980b9;
-    }
-    .result {
-      margin-top: 2rem;
-      text-align: center;
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #27ae60;
-    }
+    body { margin:0; font-family:'Montserrat',sans-serif; background:var(--bg); color:var(--text);}    
+    .container{max-width:880px;margin:32px auto;padding:24px;}
+    .card{background:var(--card-bg);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px;animation:fadeIn .8s ease;}
+    @keyframes fadeIn {from{opacity:0; transform:scale(.97);} to{opacity:1; transform:scale(1);} }
+    header{text-align:center;margin-bottom:18px;}
+    header img.hero{display:block;margin:0 auto 16px;max-width:100%;width:880px;height:auto;border-radius:12px;}
+    h1.title{margin:0;font-weight:700;font-size:clamp(1.4rem,2.2vw+1rem,2.2rem);color:var(--accent);}
+    form{display:grid;gap:14px;margin-top:14px;}
+    label{font-weight:600;font-size:0.95rem;display:block;margin-bottom:6px;}
+    input{border:1px solid #d1d5db;border-radius:10px;padding:12px 14px;font-size:1rem;background:#fff;color:var(--text);width:100%;box-sizing:border-box;}
+    #nombre{text-transform:uppercase;}
+    input::placeholder{color:#a8b1bb;font-weight:400;}
+    .grid-datetime{display:grid;grid-template-columns:90px 90px 120px 90px 90px;gap:12px;align-items:end;justify-content:start;}
+    .grid-datetime .col{display:flex;flex-direction:column;}
+    .grid-datetime label{text-align:center;}
+    .grid-datetime input.num{text-align:center;letter-spacing:1px;}
+    button{border:none;background:#2563eb;color:white;font-weight:600;border-radius:12px;padding:12px 16px;cursor:pointer;box-shadow:0 6px 14px rgba(0,0,0,0.12);}
+#boton{display:inline-block;width:auto;min-width:260px;align-self:start;}
+button[disabled]{opacity:.6;cursor:not-allowed;}
+#boton.ready{background:#15803d;box-shadow:0 6px 14px rgba(21,128,61,0.35);}    
+    .resultado{margin-top:20px;font-size:1.6rem;font-weight:700;color:var(--vibrant);text-align:center;cursor:pointer;transition:color 0.3s ease;}
+    .resultado strong{transition: color .3s ease, transform .1s ease; cursor:pointer;}
+    .resultado strong:hover{color:#1d4ed8; transform:scale(1.05);}
+    .instruccion{margin-top:12px;font-size:0.9rem;font-weight:400;color:var(--accent);text-align:center;line-height:1.4;animation:fadeIn 1s ease;}
+    .instruccion a{color:#2563eb;text-decoration:none;}
+
+    /* Pantalla secundaria */
+    #pantalla2{display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+      background: linear-gradient(270deg,#a5d8ff,#fff3bf,#ffc9c9);
+      background-size:600% 600%;
+      animation: gradientShift 15s ease infinite;
+      display:none;flex-direction:column;justify-content:center;align-items:center;
+      text-align:center;padding:20px;}
+    #pantalla2.show{display:flex;}
+    #pantalla2 h2{font-size:3rem;color:var(--vibrant);margin-bottom:20px;}
+    #pantalla2 p{max-width:600px;font-size:1.2rem;line-height:1.6;color:#1f2937;}
+    #pantalla2 button{margin-top:20px;}
+    @keyframes gradientShift{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>CURP Energético Matemático</h1>
-    <div class="image">
-      <img src="REPORTE.jpg" alt="Raíz Yo Soy" />
-    </div>
-
-    <label for="name">Nombre completo</label>
-    <input type="text" id="name" placeholder="Ejemplo FULANITO PÉREZ Y PÉREZ" oninput="this.value = this.value.toUpperCase()" />
-
-    <label>Fecha de nacimiento</label>
-    <div class="date-group">
-      <input type="text" id="day" maxlength="2" placeholder="Día" oninput="autoTab(this, 'month')" />
-      <input type="text" id="month" maxlength="2" placeholder="Mes" oninput="autoTab(this, 'year')" />
-      <input type="text" id="year" maxlength="4" placeholder="Año" />
-    </div>
-
-    <label for="time">Hora de nacimiento</label>
-    <input type="text" id="time" maxlength="5" placeholder="00:00" value="__:__" onfocus="setCursorToHour()" oninput="autoAdvanceTime(this)" />
-
-    <button class="button" onclick="calculateCURP()">Calcular CURP Energético</button>
-
-    <div class="result" id="result"></div>
+<div class="container" id="pantalla1">
+  <div class="card">
+    <header>
+      <img class="hero" src="REPORTE.jpg" alt="Encabezado REPORTE" />
+      <h1 class="title">CURP Energético Matemático</h1>
+    </header>
+    <form id="formulario" onsubmit="event.preventDefault(); calcularCURP();">
+      <div class="field">
+        <label for="nombre">Nombre completo:</label>
+        <input id="nombre" type="text" placeholder="Ejemplo FULANITO PÉREZ Y PÉREZ" required />
+      </div>
+      <div class="grid-datetime">
+        <div class="col"><label for="dia">Día</label><input id="dia" class="num" type="text" placeholder="DD" maxlength="2" /></div>
+        <div class="col"><label for="mes">Mes</label><input id="mes" class="num" type="text" placeholder="MM" maxlength="2" /></div>
+        <div class="col"><label for="anio">Año</label><input id="anio" class="num" type="text" placeholder="AAAA" maxlength="4" /></div>
+        <div class="col"><label for="horaH">Hora</label><input id="horaH" class="num" type="text" placeholder="HH" maxlength="2" /></div>
+        <div class="col"><label for="minutoM">Minutos</label><input id="minutoM" class="num" type="text" placeholder="MM" maxlength="2" /></div>
+      </div>
+      <button id="boton">Calcula tu CURP Energético</button>
+      <div id="resultado" class="resultado"></div>
+      <div id="instruccion" class="instruccion"></div>
+    </form>
   </div>
-
+</div>
+<div id="pantalla2">
+  <h2 id="numFinal"></h2>
+  <p>Has recibido tu número vibracional, ahora que lo tienes recuérdalo y recítalo al menos 9 veces al día, cuando lo hagas, ten pensamientos positivos, de abundancia, de salud, de amor o de felicidad. Repítelo continuamente y verás cambios importantes en tu vida.</p>
+  <button onclick="volverPantalla1()">Volver</button>
+  <button onclick="copiarNumero()">Copiar número</button>
+</div>
 <script>
-  const tablaValores = {
-    A: 1, B: 2, C: 3, D: 4, E: 5, F: 6, G: 7, H: 8, I: 9,
-    J: 1, K: 2, L: 3, M: 4, N: 5, Ñ: 6, O: 7, P: 8, Q: 9,
-    R: 1, S: 2, T: 3, U: 4, V: 5, W: 6, X: 7, Y: 8, Z: 9
-  };
+  const LETTER_VALUE = { 'A':1,'J':1,'R':1, 'B':2,'K':2,'S':2, 'C':3,'L':3,'T':3, 'D':4,'M':4,'U':4, 'E':5,'N':5,'V':5, 'F':6,'Ñ':6,'W':6, 'G':7,'O':7,'X':7, 'H':8,'P':8,'Y':8, 'I':9,'Q':9,'Z':9 };
+  const ACCENT_MAP = { 'Á':'A','É':'E','Í':'I','Ó':'O','Ú':'U','Ü':'U','á':'A','é':'E','í':'I','ó':'O','ú':'U','ü':'U'};
 
-  function convertirNombre(nombre) {
-    return nombre
-      .toUpperCase()
-      .replace(/[^A-ZÑ]/g, '')
-      .split('')
-      .map(letra => tablaValores[letra] || 0);
+  function normalizeName(str){
+    return str.split('').map(ch=>ACCENT_MAP[ch]??ch).join('').toUpperCase().replace(/[^A-ZÑ ]/g,'').replace(/\s+/g,' ').trim();
   }
-
-  function convertirFechaHora(dia, mes, año, hora) {
-    const fecha = dia + mes + año;
-    const horaNum = hora.replace(':', '');
-    const cadena = fecha + horaNum;
-    return cadena
-      .split('')
-      .map(n => n === '0' ? null : parseInt(n))
-      .filter(n => n);
+  function lettersToValues(str){
+    return normalizeName(str).split('').filter(c=>c!==' ').map(c=>LETTER_VALUE[c]||0);
   }
-
-  function reducirCadena(cadena) {
-    let actual = [...cadena];
-    while (actual.length > 4 || actual.length < 3) {
-      const reducido = [];
-      for (let i = 0; i < actual.length; i += 3) {
-        const grupo = actual.slice(i, i + 3);
-        if (grupo.length === 3) {
-          let suma = grupo.reduce((a, b) => a + b, 0);
-          while (suma > 9) {
-            suma = suma.toString().split('').reduce((a, b) => a + parseInt(b), 0);
-          }
-          reducido.push(suma);
-        } else {
-          reducido.push(...grupo); // añadir sobrantes sin modificar
+  function reduceChain(chain){
+    let groups=[]; let i=0;
+    while(i+2<chain.length){
+      const sum=Number(chain[i])+Number(chain[i+1])+Number(chain[i+2]);
+      let red=sum;
+      while(red>9){red=String(red).split('').reduce((a,b)=>a+Number(b),0);}
+      groups.push(red);
+      i+=3;
+    }
+    if(i<chain.length){groups.push(...chain.slice(i).split('').map(Number));}
+    return groups.join('');
+  }
+  function fullReduce(chain){
+    let c=chain;
+    while(c.length>4){ c=reduceChain(c); }
+    return c;
+  }
+  // --- Utilidades UI añadidas ---
+  function showPantalla2(num){
+    document.getElementById('pantalla1').style.display='none';
+    document.getElementById('pantalla2').style.display='flex';
+    const numEl = document.getElementById('numFinal');
+    if (numEl){ numEl.textContent = num; numEl.style.animation = 'popIn .35s ease-out'; }
+  }
+  function goBack(){
+    document.getElementById('pantalla2').style.display='none';
+    document.getElementById('pantalla1').style.display='block';
+    const btn = document.getElementById('boton');
+    if (btn) btn.style.display='';
+  }
+  function copyNumber(){
+    const n = (document.getElementById('numFinal')||{}).textContent || '';
+    const msg = document.getElementById('copyMsg');
+    if (!n) return;
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(n).then(()=>{ if(msg) msg.textContent='¡Número copiado!'; setTimeout(()=>{ if(msg) msg.textContent=''; }, 1200); })
+      .catch(()=>{ if(msg) msg.textContent='No se pudo copiar'; setTimeout(()=>{ if(msg) msg.textContent=''; }, 1200); });
+    } else {
+      // Fallback
+      const ta = document.createElement('textarea'); ta.value = n; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); if(msg) msg.textContent='¡Número copiado!'; } catch(e){ if(msg) msg.textContent='No se pudo copiar'; }
+      document.body.removeChild(ta); setTimeout(()=>{ if(msg) msg.textContent=''; }, 1200);
+    }
+  }
+  function setupAutoTab(){
+    const order=['dia','mes','anio','horaH','minutoM'];
+    order.forEach(function(id, idx){
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('input', function(){
+        el.value = el.value.replace(/[^0-9]/g,'').slice(0, el.maxLength || 4);
+        if (el.value.length === (el.maxLength || 4) && idx < order.length-1){
+          const next = document.getElementById(order[idx+1]);
+          if (next){ next.focus(); if (next.select) next.select(); }
         }
-      }
-      actual = reducido;
-    }
-    return actual.join('');
+      });
+      el.addEventListener('keydown', function(e){
+        if (e.key === 'Backspace' && el.value.length===0 && idx>0){
+          const prev = document.getElementById(order[idx-1]);
+          if (prev) prev.focus();
+        }
+      });
+    });
   }
+  function initUI(){
+    setupAutoTab();
+    var vb = document.getElementById('btnVolver'); if (vb) vb.onclick = goBack;
+    var cb = document.getElementById('btnCopiar'); if (cb) cb.onclick = copyNumber;
 
-  function calculateCURP() {
-    const nombre = document.getElementById("name").value;
-    const dia = document.getElementById("day").value.replace(/0/g, '');
-    const mes = document.getElementById("month").value.replace(/0/g, '');
-    const año = document.getElementById("year").value.replace(/0/g, '');
-    const hora = document.getElementById("time").value.replace(/0/g, '');
-
-    const valoresNombre = convertirNombre(nombre);
-    const valoresFechaHora = convertirFechaHora(dia, mes, año, hora);
-    const cadenaInicial = [...valoresNombre, ...valoresFechaHora];
-
-    const resultadoFinal = reducirCadena(cadenaInicial);
-    document.getElementById("result").textContent = `Tu CURP Energético es: ${resultadoFinal}`;
+    const btn = document.getElementById('boton');
+    const reqLen = {dia:2, mes:2, anio:4, horaH:2, minutoM:2};
+    const ids = ['nombre','dia','mes','anio','horaH','minutoM'];
+    const getEl = id => document.getElementById(id);
+    const checkReady = () => {
+      const okName = !!getEl('nombre').value.trim();
+      const okNums = Object.entries(reqLen).every(([k,l]) => (getEl(k).value||'').length === l);
+      const ok = okName && okNums;
+      if (btn){ btn.disabled = !ok; btn.classList.toggle('ready', ok); }
+    };
+    ids.forEach(id => {
+      const el = getEl(id); if (!el) return;
+      el.addEventListener('input', checkReady);
+      el.addEventListener('keyup', e=>{ if(e.key==='Enter' && btn && !btn.disabled){ calcularCURP(); } });
+    });
+    checkReady();
   }
+  document.addEventListener('DOMContentLoaded', initUI);
 
-  function autoTab(current, nextId) {
-    if (current.value.length === current.maxLength) {
-      document.getElementById(nextId).focus();
-    }
+  function calcularCURP(){
+    const nombre=document.getElementById('nombre').value.trim();
+    const dia=document.getElementById('dia').value;
+    const mes=document.getElementById('mes').value;
+    const anio=document.getElementById('anio').value;
+    const h=document.getElementById('horaH').value;
+    const mi=document.getElementById('minutoM').value;
+    if(!nombre||!dia||!mes||!anio||!h||!mi){alert('Completa todos los campos');return;}
+    const nameDigits=lettersToValues(nombre).map(String);
+    const dateTimeDigits=(dia+mes+anio+h+mi).split('').filter(ch=>ch!=='0');
+    const cadena=[...nameDigits,...dateTimeDigits].join('');
+    const result=fullReduce(cadena);
+    document.getElementById('boton').style.display='none';
+    const resultadoEl=document.getElementById('resultado');
+    resultadoEl.innerHTML=`<strong id="resultNumber">${result}</strong>`;
+    document.getElementById('instruccion').innerHTML = `Descarga la app <strong>Frequency Sound Generator</strong> en el Play Store de Google <a href=\"https://play.google.com/store/apps/details?id=com.luxdelux.frequencygenerator\" target=\"_blank\">aquí</a>, cambia los 440 Hz que vienen por default en la app a tu número energético, oprime el ícono de tu lado derecho que está debajo del + y selecciona <em>Square</em>. Listo, ¡Escucha tu propia frecuencia!`;
+    const resNum=document.getElementById('resultNumber');
+    if(resNum){ resNum.addEventListener('click',()=>{
+      document.getElementById('pantalla1').style.display='none';
+      const p2=document.getElementById('pantalla2');
+      document.getElementById('numFinal').textContent=result;
+      p2.classList.add('show');
+    }); }
   }
-
-  function setCursorToHour() {
-    const input = document.getElementById("time");
-    if (input.value === "__:__") {
-      input.value = "";
-      input.value = "__:__";
-    }
-    input.setSelectionRange(0, 2);
+  function volverPantalla1(){
+    document.getElementById('pantalla2').classList.remove('show');
+    document.getElementById('pantalla2').style.display='none';
+    document.getElementById('pantalla1').style.display='block';
+    document.getElementById('boton').style.display='inline-block';
+    document.getElementById('resultado').textContent='';
+    document.getElementById('instruccion').textContent='';
   }
-
-  function autoAdvanceTime(input) {
-    const val = input.value;
-    if (val.length === 2 && !val.includes(":")) {
-      input.value = val + ":";
-      input.setSelectionRange(3, 5);
-    }
+  function copiarNumero(){
+    const num=document.getElementById('numFinal').textContent;
+    navigator.clipboard.writeText(num).then(()=>{
+      alert('Número copiado: '+num);
+    });
   }
+  // (Auto-avance ya se gestiona en setupAutoTab() y habilitación del botón en initUI())
 </script>
-
 </body>
 </html>
-
-
-
-
-
-
-
