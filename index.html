@@ -26,17 +26,22 @@
     h1.title{margin:0;font-weight:700;font-size:clamp(1.4rem,2.2vw+1rem,2.2rem);color:var(--accent);}
     form{display:grid;gap:14px;margin-top:14px;}
     label{font-weight:600;font-size:0.95rem;display:block;margin-bottom:6px;}
-    input{border:1px solid #d1d5db;border-radius:10px;padding:12px 14px;font-size:1rem;background:#fff;color:var(--text);width:100%;box-sizing:border-box;}
+    input{border:1px solid #d1d5db;border-radius:10px;padding:12px 14px;font-size:1rem;background:#fff;color:var(--text);}
     #nombre{text-transform:uppercase;}
     input::placeholder{color:#a8b1bb;font-weight:400;}
-    .grid-datetime{display:grid;grid-template-columns:90px 90px 120px 90px 90px;gap:12px;align-items:end;justify-content:start;}
+
+    /* === FECHA/HORA === */
+    .grid-datetime{
+      display:grid;
+      grid-template-columns:repeat(5,1fr);  /* Escritorio: 5 en una fila */
+      gap:12px;
+      align-items:end;
+    }
     .grid-datetime .col{display:flex;flex-direction:column;}
     .grid-datetime label{text-align:center;}
     .grid-datetime input.num{text-align:center;letter-spacing:1px;}
-    button{border:none;background:#2563eb;color:white;font-weight:600;border-radius:12px;padding:12px 16px;cursor:pointer;box-shadow:0 6px 14px rgba(0,0,0,0.12);}
-#boton{display:inline-block;width:auto;min-width:260px;align-self:start;}
-button[disabled]{opacity:.6;cursor:not-allowed;}
-#boton.ready{background:#15803d;box-shadow:0 6px 14px rgba(21,128,61,0.35);}    
+
+    button{border:none;background:#2563eb;color:white;font-weight:600;border-radius:12px;padding:12px 16px;cursor:pointer;box-shadow:0 6px 14px rgba(0,0,0,0.12);}    
     .resultado{margin-top:20px;font-size:1.6rem;font-weight:700;color:var(--vibrant);text-align:center;cursor:pointer;transition:color 0.3s ease;}
     .resultado strong{transition: color .3s ease, transform .1s ease; cursor:pointer;}
     .resultado strong:hover{color:#1d4ed8; transform:scale(1.05);}
@@ -48,13 +53,32 @@ button[disabled]{opacity:.6;cursor:not-allowed;}
       background: linear-gradient(270deg,#a5d8ff,#fff3bf,#ffc9c9);
       background-size:600% 600%;
       animation: gradientShift 15s ease infinite;
-      display:none;flex-direction:column;justify-content:center;align-items:center;
+      display:flex;flex-direction:column;justify-content:center;align-items:center;
       text-align:center;padding:20px;}
     #pantalla2.show{display:flex;}
     #pantalla2 h2{font-size:3rem;color:var(--vibrant);margin-bottom:20px;}
     #pantalla2 p{max-width:600px;font-size:1.2rem;line-height:1.6;color:#1f2937;}
     #pantalla2 button{margin-top:20px;}
     @keyframes gradientShift{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+
+    /* ==== RESPONSIVE: móvil ≤640px ==== */
+    @media (max-width: 640px){
+      .grid-datetime{
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-areas:
+          "dia mes anio"
+          "hora min min";
+      }
+      /* mapeo por clases nuevas */
+      .grid-datetime .dt-dia{ grid-area: dia; }
+      .grid-datetime .dt-mes{ grid-area: mes; }
+      .grid-datetime .dt-anio{ grid-area: anio; }
+      .grid-datetime .dt-hora{ grid-area: hora; }
+      .grid-datetime .dt-min{ grid-area: min; }
+
+      /* botón ancho completo */
+      #Boton, #boton, button#boton{ width:100%; }
+    }
   </style>
 </head>
 <body>
@@ -64,30 +88,36 @@ button[disabled]{opacity:.6;cursor:not-allowed;}
       <img class="hero" src="REPORTE.jpg" alt="Encabezado REPORTE" />
       <h1 class="title">CURP Energético Matemático</h1>
     </header>
+
     <form id="formulario" onsubmit="event.preventDefault(); calcularCURP();">
       <div class="field">
         <label for="nombre">Nombre completo:</label>
         <input id="nombre" type="text" placeholder="Ejemplo FULANITO PÉREZ Y PÉREZ" required />
       </div>
+
+      <!-- FECHA/HORA: se agregan clases dt-* para el grid responsive -->
       <div class="grid-datetime">
-        <div class="col"><label for="dia">Día</label><input id="dia" class="num" type="text" placeholder="DD" maxlength="2" /></div>
-        <div class="col"><label for="mes">Mes</label><input id="mes" class="num" type="text" placeholder="MM" maxlength="2" /></div>
-        <div class="col"><label for="anio">Año</label><input id="anio" class="num" type="text" placeholder="AAAA" maxlength="4" /></div>
-        <div class="col"><label for="horaH">Hora</label><input id="horaH" class="num" type="text" placeholder="HH" maxlength="2" /></div>
-        <div class="col"><label for="minutoM">Minutos</label><input id="minutoM" class="num" type="text" placeholder="MM" maxlength="2" /></div>
+        <div class="col dt-dia"><label for="dia">Día</label><input id="dia" class="num" type="text" inputmode="numeric" placeholder="DD" maxlength="2" /></div>
+        <div class="col dt-mes"><label for="mes">Mes</label><input id="mes" class="num" type="text" inputmode="numeric" placeholder="MM" maxlength="2" /></div>
+        <div class="col dt-anio"><label for="anio">Año</label><input id="anio" class="num" type="text" inputmode="numeric" placeholder="AAAA" maxlength="4" /></div>
+        <div class="col dt-hora"><label for="horaH">Hora</label><input id="horaH" class="num" type="text" inputmode="numeric" placeholder="HH" maxlength="2" /></div>
+        <div class="col dt-min"><label for="minutoM">Minutos</label><input id="minutoM" class="num" type="text" inputmode="numeric" placeholder="MM" maxlength="2" /></div>
       </div>
+
       <button id="boton">Calcula tu CURP Energético</button>
       <div id="resultado" class="resultado"></div>
       <div id="instruccion" class="instruccion"></div>
     </form>
   </div>
 </div>
+
 <div id="pantalla2">
   <h2 id="numFinal"></h2>
   <p>Has recibido tu número vibracional, ahora que lo tienes recuérdalo y recítalo al menos 9 veces al día, cuando lo hagas, ten pensamientos positivos, de abundancia, de salud, de amor o de felicidad. Repítelo continuamente y verás cambios importantes en tu vida.</p>
   <button onclick="volverPantalla1()">Volver</button>
   <button onclick="copiarNumero()">Copiar número</button>
 </div>
+
 <script>
   const LETTER_VALUE = { 'A':1,'J':1,'R':1, 'B':2,'K':2,'S':2, 'C':3,'L':3,'T':3, 'D':4,'M':4,'U':4, 'E':5,'N':5,'V':5, 'F':6,'Ñ':6,'W':6, 'G':7,'O':7,'X':7, 'H':8,'P':8,'Y':8, 'I':9,'Q':9,'Z':9 };
   const ACCENT_MAP = { 'Á':'A','É':'E','Í':'I','Ó':'O','Ú':'U','Ü':'U','á':'A','é':'E','í':'I','ó':'O','ú':'U','ü':'U'};
@@ -107,7 +137,7 @@ button[disabled]{opacity:.6;cursor:not-allowed;}
       groups.push(red);
       i+=3;
     }
-    if(i<chain.length){groups.push(...chain.slice(i).split('').map(Number));}
+    if(i<chain.length){groups.push(...chain.slice(i).map(Number));}
     return groups.join('');
   }
   function fullReduce(chain){
@@ -115,76 +145,46 @@ button[disabled]{opacity:.6;cursor:not-allowed;}
     while(c.length>4){ c=reduceChain(c); }
     return c;
   }
-  // --- Utilidades UI añadidas ---
+
+  // --- Pantallas e interacción ---
   function showPantalla2(num){
     document.getElementById('pantalla1').style.display='none';
     document.getElementById('pantalla2').style.display='flex';
     const numEl = document.getElementById('numFinal');
     if (numEl){ numEl.textContent = num; numEl.style.animation = 'popIn .35s ease-out'; }
   }
-  function goBack(){
+  function volverPantalla1(){
+    document.getElementById('pantalla2').classList.remove('show');
     document.getElementById('pantalla2').style.display='none';
     document.getElementById('pantalla1').style.display='block';
-    const btn = document.getElementById('boton');
-    if (btn) btn.style.display='';
+    document.getElementById('boton').style.display='inline-block';
+    document.getElementById('resultado').textContent='';
+    document.getElementById('instruccion').textContent='';
   }
-  function copyNumber(){
-    const n = (document.getElementById('numFinal')||{}).textContent || '';
-    const msg = document.getElementById('copyMsg');
-    if (!n) return;
-    if (navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(n).then(()=>{ if(msg) msg.textContent='¡Número copiado!'; setTimeout(()=>{ if(msg) msg.textContent=''; }, 1200); })
-      .catch(()=>{ if(msg) msg.textContent='No se pudo copiar'; setTimeout(()=>{ if(msg) msg.textContent=''; }, 1200); });
-    } else {
-      // Fallback
-      const ta = document.createElement('textarea'); ta.value = n; document.body.appendChild(ta); ta.select();
-      try { document.execCommand('copy'); if(msg) msg.textContent='¡Número copiado!'; } catch(e){ if(msg) msg.textContent='No se pudo copiar'; }
-      document.body.removeChild(ta); setTimeout(()=>{ if(msg) msg.textContent=''; }, 1200);
-    }
+  function copiarNumero(){
+    const num=document.getElementById('numFinal').textContent;
+    navigator.clipboard.writeText(num).then(()=>{ alert('Número copiado: '+num); });
   }
-  function setupAutoTab(){
-    const order=['dia','mes','anio','horaH','minutoM'];
-    order.forEach(function(id, idx){
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.addEventListener('input', function(){
-        el.value = el.value.replace(/[^0-9]/g,'').slice(0, el.maxLength || 4);
-        if (el.value.length === (el.maxLength || 4) && idx < order.length-1){
-          const next = document.getElementById(order[idx+1]);
-          if (next){ next.focus(); if (next.select) next.select(); }
-        }
-      });
-      el.addEventListener('keydown', function(e){
-        if (e.key === 'Backspace' && el.value.length===0 && idx>0){
-          const prev = document.getElementById(order[idx-1]);
-          if (prev) prev.focus();
-        }
-      });
-    });
-  }
-  function initUI(){
-    setupAutoTab();
-    var vb = document.getElementById('btnVolver'); if (vb) vb.onclick = goBack;
-    var cb = document.getElementById('btnCopiar'); if (cb) cb.onclick = copyNumber;
 
-    const btn = document.getElementById('boton');
-    const reqLen = {dia:2, mes:2, anio:4, horaH:2, minutoM:2};
-    const ids = ['nombre','dia','mes','anio','horaH','minutoM'];
-    const getEl = id => document.getElementById(id);
-    const checkReady = () => {
-      const okName = !!getEl('nombre').value.trim();
-      const okNums = Object.entries(reqLen).every(([k,l]) => (getEl(k).value||'').length === l);
-      const ok = okName && okNums;
-      if (btn){ btn.disabled = !ok; btn.classList.toggle('ready', ok); }
-    };
-    ids.forEach(id => {
-      const el = getEl(id); if (!el) return;
-      el.addEventListener('input', checkReady);
-      el.addEventListener('keyup', e=>{ if(e.key==='Enter' && btn && !btn.disabled){ calcularCURP(); } });
+  // auto-avance entre campos (limpia no-dígitos y respeta maxlength)
+  function setupAutoTab(ids){
+    const inputs=ids.map(id=>document.getElementById(id)).filter(Boolean);
+    const isDigit=ch=>ch>='0'&&ch<='9';
+    inputs.forEach((el,idx)=>{
+      el.addEventListener('input',()=>{
+        el.value=el.value.split('').filter(isDigit).join('').slice(0,el.maxLength||99);
+        if(el.value.length===el.maxLength && idx<inputs.length-1){
+          inputs[idx+1].focus();inputs[idx+1].select?.();
+        }
+      });
+      el.addEventListener('keydown',e=>{
+        if(e.key==='Backspace'&&el.value.length===0&&idx>0){inputs[idx-1].focus();}
+      });
     });
-    checkReady();
   }
-  document.addEventListener('DOMContentLoaded', initUI);
+  window.addEventListener('DOMContentLoaded',()=>{
+    setupAutoTab(['dia','mes','anio','horaH','minutoM']);
+  });
 
   function calcularCURP(){
     const nombre=document.getElementById('nombre').value.trim();
@@ -201,30 +201,10 @@ button[disabled]{opacity:.6;cursor:not-allowed;}
     document.getElementById('boton').style.display='none';
     const resultadoEl=document.getElementById('resultado');
     resultadoEl.innerHTML=`<strong id="resultNumber">${result}</strong>`;
-    document.getElementById('instruccion').innerHTML = `Descarga la app <strong>Frequency Sound Generator</strong> en el Play Store de Google <a href=\"https://play.google.com/store/apps/details?id=com.luxdelux.frequencygenerator\" target=\"_blank\">aquí</a>, cambia los 440 Hz que vienen por default en la app a tu número energético, oprime el ícono de tu lado derecho que está debajo del + y selecciona <em>Square</em>. Listo, ¡Escucha tu propia frecuencia!`;
+    document.getElementById('instruccion').innerHTML = `Descarga la app <strong>Frequency Sound Generator</strong> en el Play Store de Google <a href="https://play.google.com/store/apps/details?id=com.luxdelux.frequencygenerator" target="_blank">aquí</a>, cambia los 440 Hz que vienen por default en la app a tu número energético, oprime el ícono de tu lado derecho que está debajo del + y selecciona <em>Square</em>. Listo, ¡Escucha tu propia frecuencia!`;
     const resNum=document.getElementById('resultNumber');
-    if(resNum){ resNum.addEventListener('click',()=>{
-      document.getElementById('pantalla1').style.display='none';
-      const p2=document.getElementById('pantalla2');
-      document.getElementById('numFinal').textContent=result;
-      p2.classList.add('show');
-    }); }
+    if(resNum){ resNum.addEventListener('click',()=>{ showPantalla2(result); }); }
   }
-  function volverPantalla1(){
-    document.getElementById('pantalla2').classList.remove('show');
-    document.getElementById('pantalla2').style.display='none';
-    document.getElementById('pantalla1').style.display='block';
-    document.getElementById('boton').style.display='inline-block';
-    document.getElementById('resultado').textContent='';
-    document.getElementById('instruccion').textContent='';
-  }
-  function copiarNumero(){
-    const num=document.getElementById('numFinal').textContent;
-    navigator.clipboard.writeText(num).then(()=>{
-      alert('Número copiado: '+num);
-    });
-  }
-  // (Auto-avance ya se gestiona en setupAutoTab() y habilitación del botón en initUI())
 </script>
 </body>
 </html>
