@@ -26,42 +26,53 @@
     h1.title{margin:0;font-weight:700;font-size:clamp(1.4rem,2.2vw+1rem,2.2rem);color:var(--accent);}
     form{display:grid;gap:14px;margin-top:14px;}
     label{font-weight:600;font-size:0.95rem;display:block;margin-bottom:6px;}
-    input{border:1px solid #d1d5db;border-radius:10px;padding:12px 14px;font-size:1rem;background:#fff;color:var(--text);}
+    input{
+      border:1px solid #d1d5db;border-radius:10px;padding:12px 14px;font-size:1rem;
+      background:#fff;color:var(--text);width:100%;box-sizing:border-box;
+    }
     #nombre{text-transform:uppercase;}
     input::placeholder{color:#a8b1bb;font-weight:400;}
 
-    /* === FECHA/HORA === */
+    /* Desktop: 5 columnas en una fila */
     .grid-datetime{
       display:grid;
-      grid-template-columns:repeat(5,1fr);  /* Escritorio: 5 en una fila */
-      gap:12px;
-      align-items:end;
+      grid-template-columns:90px 90px 120px 90px 90px;
+      gap:12px; align-items:end; justify-content:start;
     }
     .grid-datetime .col{display:flex;flex-direction:column;}
     .grid-datetime label{text-align:center;}
     .grid-datetime input.num{text-align:center;letter-spacing:1px;}
 
-    button{border:none;background:#2563eb;color:white;font-weight:600;border-radius:12px;padding:12px 16px;cursor:pointer;box-shadow:0 6px 14px rgba(0,0,0,0.12);}    
+    button{
+      border:none;background:#2563eb;color:white;font-weight:600;border-radius:12px;
+      padding:12px 16px;cursor:pointer;box-shadow:0 6px 14px rgba(0,0,0,0.12);
+    }
+    #boton{display:inline-block;width:auto;min-width:260px;align-self:start;}
+    button[disabled]{opacity:.6;cursor:not-allowed;}
+    #boton.ready{background:#15803d;box-shadow:0 6px 14px rgba(21,128,61,0.35);}    
+
     .resultado{margin-top:20px;font-size:1.6rem;font-weight:700;color:var(--vibrant);text-align:center;cursor:pointer;transition:color 0.3s ease;}
     .resultado strong{transition: color .3s ease, transform .1s ease; cursor:pointer;}
     .resultado strong:hover{color:#1d4ed8; transform:scale(1.05);}
     .instruccion{margin-top:12px;font-size:0.9rem;font-weight:400;color:var(--accent);text-align:center;line-height:1.4;animation:fadeIn 1s ease;}
     .instruccion a{color:#2563eb;text-decoration:none;}
 
-    /* Pantalla secundaria */
-    #pantalla2{display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+    /* Pantalla secundaria: OCULTA por defecto (solo se muestra con .show) */
+    #pantalla2{
+      display:none; /* <-- único display aquí */
+      position:fixed;top:0;left:0;width:100%;height:100%;
       background: linear-gradient(270deg,#a5d8ff,#fff3bf,#ffc9c9);
       background-size:600% 600%;
       animation: gradientShift 15s ease infinite;
-      display:flex;flex-direction:column;justify-content:center;align-items:center;
-      text-align:center;padding:20px;}
-    #pantalla2.show{display:flex;}
+      text-align:center;padding:20px;
+    }
+    #pantalla2.show{display:flex;flex-direction:column;justify-content:center;align-items:center;}
     #pantalla2 h2{font-size:3rem;color:var(--vibrant);margin-bottom:20px;}
     #pantalla2 p{max-width:600px;font-size:1.2rem;line-height:1.6;color:#1f2937;}
     #pantalla2 button{margin-top:20px;}
     @keyframes gradientShift{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
 
-    /* ==== RESPONSIVE: móvil ≤640px ==== */
+    /* ===== MÓVIL: Hora y Min a segunda línea ===== */
     @media (max-width: 640px){
       .grid-datetime{
         grid-template-columns: repeat(3, 1fr);
@@ -69,15 +80,15 @@
           "dia mes anio"
           "hora min min";
       }
-      /* mapeo por clases nuevas */
-      .grid-datetime .dt-dia{ grid-area: dia; }
-      .grid-datetime .dt-mes{ grid-area: mes; }
-      .grid-datetime .dt-anio{ grid-area: anio; }
-      .grid-datetime .dt-hora{ grid-area: hora; }
-      .grid-datetime .dt-min{ grid-area: min; }
+      /* Sin tocar tu HTML: mapeamos por posición */
+      .grid-datetime .col:nth-child(1){ grid-area: dia; }
+      .grid-datetime .col:nth-child(2){ grid-area: mes; }
+      .grid-datetime .col:nth-child(3){ grid-area: anio; }
+      .grid-datetime .col:nth-child(4){ grid-area: hora; }
+      .grid-datetime .col:nth-child(5){ grid-area: min; }
 
-      /* botón ancho completo */
-      #Boton, #boton, button#boton{ width:100%; }
+      /* Botón ancho completo en móvil (opcional) */
+      #boton{ width:100%; }
     }
   </style>
 </head>
@@ -95,13 +106,12 @@
         <input id="nombre" type="text" placeholder="Ejemplo FULANITO PÉREZ Y PÉREZ" required />
       </div>
 
-      <!-- FECHA/HORA: se agregan clases dt-* para el grid responsive -->
       <div class="grid-datetime">
-        <div class="col dt-dia"><label for="dia">Día</label><input id="dia" class="num" type="text" inputmode="numeric" placeholder="DD" maxlength="2" /></div>
-        <div class="col dt-mes"><label for="mes">Mes</label><input id="mes" class="num" type="text" inputmode="numeric" placeholder="MM" maxlength="2" /></div>
-        <div class="col dt-anio"><label for="anio">Año</label><input id="anio" class="num" type="text" inputmode="numeric" placeholder="AAAA" maxlength="4" /></div>
-        <div class="col dt-hora"><label for="horaH">Hora</label><input id="horaH" class="num" type="text" inputmode="numeric" placeholder="HH" maxlength="2" /></div>
-        <div class="col dt-min"><label for="minutoM">Minutos</label><input id="minutoM" class="num" type="text" inputmode="numeric" placeholder="MM" maxlength="2" /></div>
+        <div class="col"><label for="dia">Día</label><input id="dia" class="num" type="text" inputmode="numeric" placeholder="DD" maxlength="2" /></div>
+        <div class="col"><label for="mes">Mes</label><input id="mes" class="num" type="text" inputmode="numeric" placeholder="MM" maxlength="2" /></div>
+        <div class="col"><label for="anio">Año</label><input id="anio" class="num" type="text" inputmode="numeric" placeholder="AAAA" maxlength="4" /></div>
+        <div class="col"><label for="horaH">Hora</label><input id="horaH" class="num" type="text" inputmode="numeric" placeholder="HH" maxlength="2" /></div>
+        <div class="col"><label for="minutoM">Minutos</label><input id="minutoM" class="num" type="text" inputmode="numeric" placeholder="MM" maxlength="2" /></div>
       </div>
 
       <button id="boton">Calcula tu CURP Energético</button>
@@ -137,7 +147,7 @@
       groups.push(red);
       i+=3;
     }
-    if(i<chain.length){groups.push(...chain.slice(i).map(Number));}
+    if(i<chain.length){ groups.push(...chain.slice(i).split('').map(Number)); }
     return groups.join('');
   }
   function fullReduce(chain){
@@ -146,16 +156,16 @@
     return c;
   }
 
-  // --- Pantallas e interacción ---
+  // Mostrar solo con clase .show (sin style.display manual)
   function showPantalla2(num){
     document.getElementById('pantalla1').style.display='none';
-    document.getElementById('pantalla2').style.display='flex';
-    const numEl = document.getElementById('numFinal');
-    if (numEl){ numEl.textContent = num; numEl.style.animation = 'popIn .35s ease-out'; }
+    const p2 = document.getElementById('pantalla2');
+    document.getElementById('numFinal').textContent = num;
+    p2.classList.add('show');
   }
   function volverPantalla1(){
-    document.getElementById('pantalla2').classList.remove('show');
-    document.getElementById('pantalla2').style.display='none';
+    const p2 = document.getElementById('pantalla2');
+    p2.classList.remove('show');
     document.getElementById('pantalla1').style.display='block';
     document.getElementById('boton').style.display='inline-block';
     document.getElementById('resultado').textContent='';
@@ -166,24 +176,43 @@
     navigator.clipboard.writeText(num).then(()=>{ alert('Número copiado: '+num); });
   }
 
-  // auto-avance entre campos (limpia no-dígitos y respeta maxlength)
-  function setupAutoTab(ids){
-    const inputs=ids.map(id=>document.getElementById(id)).filter(Boolean);
-    const isDigit=ch=>ch>='0'&&ch<='9';
-    inputs.forEach((el,idx)=>{
-      el.addEventListener('input',()=>{
-        el.value=el.value.split('').filter(isDigit).join('').slice(0,el.maxLength||99);
-        if(el.value.length===el.maxLength && idx<inputs.length-1){
-          inputs[idx+1].focus();inputs[idx+1].select?.();
+  // Auto-tab y habilitar botón cuando todo está completo
+  function setupAutoTab(){
+    const order=['dia','mes','anio','horaH','minutoM'];
+    order.forEach((id, idx)=>{
+      const el=document.getElementById(id);
+      if(!el) return;
+      el.addEventListener('input', ()=>{
+        el.value = el.value.replace(/[^0-9]/g,'').slice(0, el.maxLength || 4);
+        if(el.value.length === (el.maxLength || 4) && idx < order.length-1){
+          const next=document.getElementById(order[idx+1]);
+          if(next){ next.focus(); next.select?.(); }
         }
+        checkReady();
       });
-      el.addEventListener('keydown',e=>{
-        if(e.key==='Backspace'&&el.value.length===0&&idx>0){inputs[idx-1].focus();}
+      el.addEventListener('keydown', (e)=>{
+        if(e.key==='Backspace' && el.value.length===0 && idx>0){
+          const prev=document.getElementById(order[idx-1]);
+          if(prev) prev.focus();
+        }
       });
     });
   }
-  window.addEventListener('DOMContentLoaded',()=>{
-    setupAutoTab(['dia','mes','anio','horaH','minutoM']);
+  function checkReady(){
+    const reqLen = {dia:2, mes:2, anio:4, horaH:2, minutoM:2};
+    const okName = !!document.getElementById('nombre').value.trim();
+    const okNums = Object.entries(reqLen).every(([k,l]) => (document.getElementById(k).value||'').length===l);
+    const ok = okName && okNums;
+    const btn = document.getElementById('boton');
+    if(btn){ btn.disabled = !ok; btn.classList.toggle('ready', ok); }
+  }
+
+  document.addEventListener('DOMContentLoaded', ()=>{
+    // Estado inicial: pantalla1 visible, pantalla2 oculta
+    document.getElementById('pantalla1').style.display='block';
+    document.getElementById('pantalla2').classList.remove('show');
+    setupAutoTab();
+    checkReady();
   });
 
   function calcularCURP(){
@@ -203,7 +232,7 @@
     resultadoEl.innerHTML=`<strong id="resultNumber">${result}</strong>`;
     document.getElementById('instruccion').innerHTML = `Descarga la app <strong>Frequency Sound Generator</strong> en el Play Store de Google <a href="https://play.google.com/store/apps/details?id=com.luxdelux.frequencygenerator" target="_blank">aquí</a>, cambia los 440 Hz que vienen por default en la app a tu número energético, oprime el ícono de tu lado derecho que está debajo del + y selecciona <em>Square</em>. Listo, ¡Escucha tu propia frecuencia!`;
     const resNum=document.getElementById('resultNumber');
-    if(resNum){ resNum.addEventListener('click',()=>{ showPantalla2(result); }); }
+    if(resNum){ resNum.addEventListener('click',()=> showPantalla2(result)); }
   }
 </script>
 </body>
