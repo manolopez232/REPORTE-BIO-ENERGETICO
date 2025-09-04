@@ -103,89 +103,94 @@
     <div class="result" id="result"></div>
   </div>
 
-  <script>
-    function sumDigits(num) {
-      while (num >= 10) {
-        num = num.toString().split('').reduce((a, b) => a + parseInt(b), 0);
+<script>
+  const tablaValores = {
+    A: 1, B: 2, C: 3, D: 4, E: 5, F: 6, G: 7, H: 8, I: 9,
+    J: 1, K: 2, L: 3, M: 4, N: 5, Ñ: 6, O: 7, P: 8, Q: 9,
+    R: 1, S: 2, T: 3, U: 4, V: 5, W: 6, X: 7, Y: 8, Z: 9
+  };
+
+  function convertirNombre(nombre) {
+    return nombre
+      .toUpperCase()
+      .replace(/[^A-ZÑ]/g, '')
+      .split('')
+      .map(letra => tablaValores[letra] || 0);
+  }
+
+  function convertirFechaHora(dia, mes, año, hora) {
+    const fecha = dia + mes + año;
+    const horaNum = hora.replace(':', '');
+    const cadena = fecha + horaNum;
+    return cadena
+      .split('')
+      .map(n => n === '0' ? null : parseInt(n))
+      .filter(n => n);
+  }
+
+  function reducirCadena(cadena) {
+    let actual = [...cadena];
+    while (actual.length > 4 || actual.length < 3) {
+      const reducido = [];
+      for (let i = 0; i < actual.length; i += 3) {
+        const grupo = actual.slice(i, i + 3);
+        if (grupo.length === 3) {
+          let suma = grupo.reduce((a, b) => a + b, 0);
+          while (suma > 9) {
+            suma = suma.toString().split('').reduce((a, b) => a + parseInt(b), 0);
+          }
+          reducido.push(suma);
+        } else {
+          reducido.push(...grupo); // añadir sobrantes sin modificar
+        }
       }
-      return num;
+      actual = reducido;
     }
+    return actual.join('');
+  }
 
-    function getLetterValue(letter) {
-      const table = [
-        ['A','B','C','D','E','F','G','H','I'],
-        ['J','K','L','M','N','Ñ','O','P','Q'],
-        ['R','S','T','U','V','W','X','Y','Z']
-      ];
-      for (let row of table) {
-        const index = row.indexOf(letter);
-        if (index !== -1) return index + 1;
-      }
-      return 0;
+  function calculateCURP() {
+    const nombre = document.getElementById("name").value;
+    const dia = document.getElementById("day").value.replace(/0/g, '');
+    const mes = document.getElementById("month").value.replace(/0/g, '');
+    const año = document.getElementById("year").value.replace(/0/g, '');
+    const hora = document.getElementById("time").value.replace(/0/g, '');
+
+    const valoresNombre = convertirNombre(nombre);
+    const valoresFechaHora = convertirFechaHora(dia, mes, año, hora);
+    const cadenaInicial = [...valoresNombre, ...valoresFechaHora];
+
+    const resultadoFinal = reducirCadena(cadenaInicial);
+    document.getElementById("result").textContent = `Tu CURP Energético es: ${resultadoFinal}`;
+  }
+
+  function autoTab(current, nextId) {
+    if (current.value.length === current.maxLength) {
+      document.getElementById(nextId).focus();
     }
+  }
 
-    function reduceByTriadas(arr) {
-      const result = [];
-      let i = 0;
-      while (i + 2 < arr.length) {
-        const sum = arr[i] + arr[i + 1] + arr[i + 2];
-        result.push(sumDigits(sum));
-        i += 3;
-      }
-      while (i < arr.length) {
-        result.push(arr[i]);
-        i++;
-      }
-      return result;
+  function setCursorToHour() {
+    const input = document.getElementById("time");
+    if (input.value === "__:__") {
+      input.value = "";
+      input.value = "__:__";
     }
+    input.setSelectionRange(0, 2);
+  }
 
-    function calculateCURP() {
-      const name = document.getElementById("name").value.toUpperCase().replace(/[^A-ZÑ]/g, '');
-      const day = document.getElementById("day").value.replace(/0/g, '');
-      const month = document.getElementById("month").value.replace(/0/g, '');
-      const year = document.getElementById("year").value.replace(/0/g, '');
-      const time = document.getElementById("time").value.replace(/0/g, '').replace(':', '');
-
-      const nameSequence = name.split('').map(getLetterValue).join('');
-      const fullSequence = nameSequence + day + month + year + time;
-
-      const triadas = fullSequence.match(/.{1,3}/g) || [];
-      const reducedTriadas = triadas.map(triada => {
-        const sum = triada.split('').reduce((a, b) => a + parseInt(b), 0);
-        return sumDigits(sum);
-      });
-
-      const secondReduced = reduceByTriadas(reducedTriadas);
-      const thirdReduced = reduceByTriadas(secondReduced);
-
-      document.getElementById("result").textContent = `Tu CURP Energético es: ${thirdReduced.join(', ')}`;
+  function autoAdvanceTime(input) {
+    const val = input.value;
+    if (val.length === 2 && !val.includes(":")) {
+      input.value = val + ":";
+      input.setSelectionRange(3, 5);
     }
+  }
+</script>
 
-    function autoTab(current, nextId) {
-      if (current.value.length === current.maxLength) {
-        document.getElementById(nextId).focus();
-      }
-    }
-
-    function setCursorToHour() {
-      const input = document.getElementById("time");
-      if (input.value === "__:__") {
-        input.value = "";
-        input.value = "__:__";
-      }
-      input.setSelectionRange(0, 2);
-    }
-
-    function autoAdvanceTime(input) {
-      const val = input.value;
-      if (val.length === 2 && !val.includes(":")) {
-        input.value = val + ":";
-        input.setSelectionRange(3, 5);
-      }
-    }
-  </script>
 </body>
 </html>
+
 
 
 
