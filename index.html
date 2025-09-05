@@ -16,9 +16,10 @@
       --radius: 16px;
       --shadow: 0 10px 25px rgba(0,0,0,0.08);
       --vibrant: #e63946;
+      --brand: #2563eb;
     }
 
-    /* --- Resets útiles --- */
+    /* Resets útiles */
     *, *::before, *::after { box-sizing: border-box; }
     html, body { overflow-x: hidden; }
 
@@ -49,7 +50,7 @@
     .grid-datetime input.num{text-align:center;letter-spacing:1px;}
 
     button{
-      border:none;background:#2563eb;color:white;font-weight:600;border-radius:12px;
+      border:none;background:var(--brand);color:white;font-weight:600;border-radius:12px;
       padding:12px 16px;cursor:pointer;box-shadow:0 6px 14px rgba(0,0,0,0.12);
     }
     #boton{display:inline-block;width:auto;min-width:260px;align-self:start;}
@@ -60,9 +61,17 @@
     .resultado strong{transition: color .3s ease, transform .1s ease; cursor:pointer;}
     .resultado strong:hover{color:#1d4ed8; transform:scale(1.05);}
     .instruccion{margin-top:12px;font-size:0.9rem;font-weight:400;color:var(--accent);text-align:center;line-height:1.4;animation:fadeIn 1s ease;}
-    .instruccion a{color:#2563eb;text-decoration:none;}
+    .instruccion a{color:var(--brand);text-decoration:none;}
 
-    /* Pantalla secundaria: OCULTA por defecto (solo se muestra con .show) */
+    /* Botón pequeño “nuevo cálculo” */
+    .reset-wrap{display:flex;justify-content:center;margin-top:10px;}
+    .btn-reset{
+      background:transparent;border:0;color:#6b7280;cursor:pointer;
+      font-size:0.85rem;text-decoration:underline;padding:6px 8px;border-radius:8px;
+    }
+    .btn-reset:hover{ color:#374151; }
+
+    /* Pantalla secundaria: OCULTA por defecto */
     #pantalla2{
       display:none;
       position:fixed;top:0;left:0;width:100%;height:100%;
@@ -70,7 +79,7 @@
       background-size:600% 600%;
       animation: gradientShift 15s ease infinite;
       text-align:center;padding:20px;
-      box-sizing:border-box; /* evita sumar ancho con padding */
+      box-sizing:border-box;
     }
     #pantalla2.show{display:flex;flex-direction:column;justify-content:center;align-items:center;}
     #pantalla2 h2{font-size:3rem;color:var(--vibrant);margin-bottom:20px;}
@@ -78,14 +87,14 @@
     #pantalla2 button{margin-top:20px;}
     @keyframes gradientShift{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
 
-    /* Hint “Haz clic” */
+    /* Hint “Haz clic en el número” */
     .hint-tap{
       margin-top:6px;font-size:0.85rem;color:#6b7280;
       animation: hintBlink 1.2s ease-in-out infinite;
     }
     @keyframes hintBlink{ 0%,100%{opacity:0} 50%{opacity:1} }
 
-    /* ===== MÓVIL: Hora y Min a segunda línea ===== */
+    /* MÓVIL: Hora y Min a segunda línea */
     @media (max-width: 640px){
       .grid-datetime{
         grid-template-columns: repeat(3, 1fr);
@@ -93,14 +102,11 @@
           "dia mes anio"
           "hora min min";
       }
-      /* Mapeo por posición (sin tocar tu HTML) */
       .grid-datetime .col:nth-child(1){ grid-area: dia; }
       .grid-datetime .col:nth-child(2){ grid-area: mes; }
       .grid-datetime .col:nth-child(3){ grid-area: anio; }
       .grid-datetime .col:nth-child(4){ grid-area: hora; }
       .grid-datetime .col:nth-child(5){ grid-area: min; }
-
-      /* Botón ancho completo en móvil (opcional) */
       #boton{ width:100%; }
     }
   </style>
@@ -130,6 +136,11 @@
       <button id="boton">Calcula tu CURP Energético</button>
       <div id="resultado" class="resultado"></div>
       <div id="instruccion" class="instruccion"></div>
+
+      <!-- Botón pequeño para reiniciar el formulario en la pantalla 1 -->
+      <div class="reset-wrap">
+        <button type="button" id="btnReset" class="btn-reset">Iniciar un nuevo cálculo</button>
+      </div>
     </form>
   </div>
 </div>
@@ -172,10 +183,7 @@
   // Mostrar solo con clase .show (sin style.display manual)
   function showPantalla2(num){
     document.getElementById('pantalla1').style.display='none';
-    // Quitamos el hint si existe (para que no aparezca en pantalla 2)
-    const hint = document.getElementById('tapHint');
-    if (hint) hint.remove();
-
+    const hint = document.getElementById('tapHint'); if (hint) hint.remove();
     const p2 = document.getElementById('pantalla2');
     document.getElementById('numFinal').textContent = num;
     p2.classList.add('show');
@@ -224,12 +232,24 @@
     if(btn){ btn.disabled = !ok; btn.classList.toggle('ready', ok); }
   }
 
+  // Nuevo cálculo: limpia y deja listo
+  function resetCalculo(){
+    const ids = ['nombre','dia','mes','anio','horaH','minutoM'];
+    ids.forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+    document.getElementById('resultado').textContent='';
+    document.getElementById('instruccion').textContent='';
+    const btn = document.getElementById('boton');
+    if(btn){ btn.style.display='inline-block'; btn.disabled = true; btn.classList.remove('ready'); }
+    document.getElementById('nombre').focus();
+  }
+
   document.addEventListener('DOMContentLoaded', ()=>{
-    // Estado inicial: pantalla1 visible, pantalla2 oculta
     document.getElementById('pantalla1').style.display='block';
     document.getElementById('pantalla2').classList.remove('show');
     setupAutoTab();
     checkReady();
+    const btnReset = document.getElementById('btnReset');
+    if(btnReset){ btnReset.addEventListener('click', resetCalculo); }
   });
 
   function calcularCURP(){
@@ -240,17 +260,18 @@
     const h=document.getElementById('horaH').value;
     const mi=document.getElementById('minutoM').value;
     if(!nombre||!dia||!mes||!anio||!h||!mi){alert('Completa todos los campos');return;}
+
     const nameDigits=lettersToValues(nombre).map(String);
     const dateTimeDigits=(dia+mes+anio+h+mi).split('').filter(ch=>ch!=='0');
     const cadena=[...nameDigits,...dateTimeDigits].join('');
     const result=fullReduce(cadena);
 
-    // Número + hint “Haz clic” SOLO en pantalla 1
+    // Número + hint (texto cambiado)
     document.getElementById('boton').style.display='none';
     const resultadoEl=document.getElementById('resultado');
     resultadoEl.innerHTML = `
       <strong id="resultNumber">${result}</strong>
-      <div id="tapHint" class="hint-tap">Haz clic</div>
+      <div id="tapHint" class="hint-tap">Haz clic en el número</div>
     `;
     document.getElementById('instruccion').innerHTML =
       `Descarga la app <strong>Frequency Sound Generator</strong> en el Play Store de Google
