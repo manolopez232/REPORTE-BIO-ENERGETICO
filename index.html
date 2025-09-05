@@ -17,6 +17,7 @@
       --shadow: 0 10px 25px rgba(0,0,0,0.08);
       --vibrant: #e63946;
       --brand: #2563eb;
+      --tooltip-bg: #111827;
     }
 
     /* Resets útiles */
@@ -39,15 +40,57 @@
     #nombre{text-transform:uppercase;}
     input::placeholder{color:#a8b1bb;font-weight:400;}
 
-    /* Desktop: 5 columnas en una fila */
+    /* Desktop: agrego 6ª columna para la nota */
     .grid-datetime{
       display:grid;
-      grid-template-columns:90px 90px 120px 90px 90px;
+      grid-template-columns:90px 90px 120px 90px 90px minmax(180px, 1fr);
       gap:12px; align-items:end; justify-content:start;
     }
     .grid-datetime .col{display:flex;flex-direction:column;}
     .grid-datetime label{text-align:center;}
     .grid-datetime input.num{text-align:center;letter-spacing:1px;}
+
+    /* Abrimos un poco la distancia entre Año y Hora en escritorio */
+    .grid-datetime .dt-hora{ margin-left: 16px; }
+
+    /* Nota visible en desktop y mobile */
+    .time-note{
+      display:block;
+      grid-column: 6;
+      align-self:end;
+      text-align:left;
+    }
+    .time-note .note-content{
+      display:inline-flex; align-items:center; gap:6px; position:relative;
+    }
+    .time-note small{ font-size:0.8rem; color:#6b7280; line-height:1.25; }
+
+    /* Icono/tooltip accesible */
+    .info-badge{
+      background:transparent; border:0; padding:2px 4px;
+      font-size:0.95rem; line-height:1; cursor:help; color:#6b7280;
+      border-radius:6px;
+    }
+    .info-badge:focus{ outline:2px solid #9ca3af; outline-offset:2px; }
+
+    .tooltip{
+      position:absolute; bottom:125%; left:0; transform: translateY(-6px);
+      background:var(--tooltip-bg); color:#fff; padding:8px 10px;
+      border-radius:8px; font-size:0.78rem; width:220px; z-index:50;
+      box-shadow:0 8px 20px rgba(0,0,0,.18);
+      opacity:0; pointer-events:none; transition:opacity .2s, transform .2s;
+    }
+    .tooltip::after{
+      content:""; position:absolute; top:100%; left:14px;
+      border-width:6px; border-style:solid;
+      border-color:var(--tooltip-bg) transparent transparent transparent;
+    }
+    /* Mostrar tooltip en hover/focus o cuando data-open=true (tap móvil) */
+    .info-badge:hover + .tooltip,
+    .info-badge:focus + .tooltip,
+    .info-badge[data-open="true"] + .tooltip{
+      opacity:1; transform: translateY(-2px); pointer-events:auto;
+    }
 
     button{
       border:none;background:var(--brand);color:white;font-weight:600;border-radius:12px;
@@ -94,19 +137,20 @@
     }
     @keyframes hintBlink{ 0%,100%{opacity:0} 50%{opacity:1} }
 
-    /* MÓVIL: Hora y Min a segunda línea */
+    /* MÓVIL: Hora y Min del mismo ancho + nota a la derecha */
     @media (max-width: 640px){
       .grid-datetime{
         grid-template-columns: repeat(3, 1fr);
         grid-template-areas:
           "dia mes anio"
-          "hora min min";
+          "hora min info";
       }
-      .grid-datetime .col:nth-child(1){ grid-area: dia; }
-      .grid-datetime .col:nth-child(2){ grid-area: mes; }
-      .grid-datetime .col:nth-child(3){ grid-area: anio; }
-      .grid-datetime .col:nth-child(4){ grid-area: hora; }
-      .grid-datetime .col:nth-child(5){ grid-area: min; }
+      .grid-datetime .dt-dia{ grid-area: dia; }
+      .grid-datetime .dt-mes{ grid-area: mes; }
+      .grid-datetime .dt-anio{ grid-area: anio; }
+      .grid-datetime .dt-hora{ grid-area: hora; margin-left:0; }
+      .grid-datetime .dt-min{ grid-area: min; }
+      .time-note{ grid-area: info; }
       #boton{ width:100%; }
     }
   </style>
@@ -126,11 +170,21 @@
       </div>
 
       <div class="grid-datetime">
-        <div class="col"><label for="dia">Día</label><input id="dia" class="num" type="text" inputmode="numeric" placeholder="DD" maxlength="2" /></div>
-        <div class="col"><label for="mes">Mes</label><input id="mes" class="num" type="text" inputmode="numeric" placeholder="MM" maxlength="2" /></div>
-        <div class="col"><label for="anio">Año</label><input id="anio" class="num" type="text" inputmode="numeric" placeholder="AAAA" maxlength="4" /></div>
-        <div class="col"><label for="horaH">Hora</label><input id="horaH" class="num" type="text" inputmode="numeric" placeholder="HH" maxlength="2" /></div>
-        <div class="col"><label for="minutoM">Minutos</label><input id="minutoM" class="num" type="text" inputmode="numeric" placeholder="MM" maxlength="2" /></div>
+        <div class="col dt-dia"><label for="dia">Día:</label><input id="dia" class="num" type="text" inputmode="numeric" placeholder="DD" maxlength="2" /></div>
+        <div class="col dt-mes"><label for="mes">Mes:</label><input id="mes" class="num" type="text" inputmode="numeric" placeholder="MM" maxlength="2" /></div>
+        <div class="col dt-anio"><label for="anio">Año:</label><input id="anio" class="num" type="text" inputmode="numeric" placeholder="AAAA" maxlength="4" /></div>
+        <div class="col dt-hora"><label for="horaH">Hora:</label><input id="horaH" class="num" type="text" inputmode="numeric" placeholder="HH" maxlength="2" /></div>
+        <div class="col dt-min"><label for="minutoM">Minutos:</label><input id="minutoM" class="num" type="text" inputmode="numeric" placeholder="MM" maxlength="2" /></div>
+        <!-- Nota con icono y tooltip -->
+        <div class="col time-note">
+          <div class="note-content">
+            <small>Introduce la hora en formato de 24 hrs</small>
+            <button type="button" class="info-badge" aria-label="Ayuda sobre formato de 24 horas" aria-describedby="tip-24h">ℹ️</button>
+            <div class="tooltip" id="tip-24h" role="tooltip">
+              Usa 00–23 para la hora. Ej.: 21:45 equivale a 9:45 pm.
+            </div>
+          </div>
+        </div>
       </div>
 
       <button id="boton">Calcula tu CURP Energético</button>
@@ -243,6 +297,29 @@
     document.getElementById('nombre').focus();
   }
 
+  // Tooltip: permitir tap en móvil (toggle), se cierra al tocar fuera o tras 3s en dispositivos con hover
+  function setupTooltip(){
+    const btn = document.querySelector('.info-badge');
+    if(!btn) return;
+    const tip = btn.nextElementSibling;
+
+    btn.addEventListener('click', (e)=>{
+      const open = btn.getAttribute('data-open') === 'true';
+      btn.setAttribute('data-open', open ? 'false' : 'true');
+      // Autocierre suave en dispositivos con hover
+      if (matchMedia('(hover: hover)').matches) {
+        setTimeout(()=>{ btn.setAttribute('data-open','false'); }, 3000);
+      }
+      e.stopPropagation();
+    });
+
+    document.addEventListener('click', (e)=>{
+      if (!btn.contains(e.target) && !tip.contains(e.target)) {
+        btn.setAttribute('data-open','false');
+      }
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', ()=>{
     document.getElementById('pantalla1').style.display='block';
     document.getElementById('pantalla2').classList.remove('show');
@@ -250,6 +327,7 @@
     checkReady();
     const btnReset = document.getElementById('btnReset');
     if(btnReset){ btnReset.addEventListener('click', resetCalculo); }
+    setupTooltip();
   });
 
   function calcularCURP(){
@@ -266,7 +344,7 @@
     const cadena=[...nameDigits,...dateTimeDigits].join('');
     const result=fullReduce(cadena);
 
-    // Número + hint (texto cambiado)
+    // Número + hint (texto actualizado)
     document.getElementById('boton').style.display='none';
     const resultadoEl=document.getElementById('resultado');
     resultadoEl.innerHTML = `
