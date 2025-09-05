@@ -17,6 +17,11 @@
       --shadow: 0 10px 25px rgba(0,0,0,0.08);
       --vibrant: #e63946;
     }
+
+    /* --- Resets útiles --- */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { overflow-x: hidden; }
+
     body { margin:0; font-family:'Montserrat',sans-serif; background:var(--bg); color:var(--text);}    
     .container{max-width:880px;margin:32px auto;padding:24px;}
     .card{background:var(--card-bg);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px;animation:fadeIn .8s ease;}
@@ -59,18 +64,26 @@
 
     /* Pantalla secundaria: OCULTA por defecto (solo se muestra con .show) */
     #pantalla2{
-      display:none; /* <-- único display aquí */
+      display:none;
       position:fixed;top:0;left:0;width:100%;height:100%;
       background: linear-gradient(270deg,#a5d8ff,#fff3bf,#ffc9c9);
       background-size:600% 600%;
       animation: gradientShift 15s ease infinite;
       text-align:center;padding:20px;
+      box-sizing:border-box; /* evita sumar ancho con padding */
     }
     #pantalla2.show{display:flex;flex-direction:column;justify-content:center;align-items:center;}
     #pantalla2 h2{font-size:3rem;color:var(--vibrant);margin-bottom:20px;}
     #pantalla2 p{max-width:600px;font-size:1.2rem;line-height:1.6;color:#1f2937;}
     #pantalla2 button{margin-top:20px;}
     @keyframes gradientShift{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+
+    /* Hint “Haz clic” */
+    .hint-tap{
+      margin-top:6px;font-size:0.85rem;color:#6b7280;
+      animation: hintBlink 1.2s ease-in-out infinite;
+    }
+    @keyframes hintBlink{ 0%,100%{opacity:0} 50%{opacity:1} }
 
     /* ===== MÓVIL: Hora y Min a segunda línea ===== */
     @media (max-width: 640px){
@@ -80,7 +93,7 @@
           "dia mes anio"
           "hora min min";
       }
-      /* Sin tocar tu HTML: mapeamos por posición */
+      /* Mapeo por posición (sin tocar tu HTML) */
       .grid-datetime .col:nth-child(1){ grid-area: dia; }
       .grid-datetime .col:nth-child(2){ grid-area: mes; }
       .grid-datetime .col:nth-child(3){ grid-area: anio; }
@@ -159,6 +172,10 @@
   // Mostrar solo con clase .show (sin style.display manual)
   function showPantalla2(num){
     document.getElementById('pantalla1').style.display='none';
+    // Quitamos el hint si existe (para que no aparezca en pantalla 2)
+    const hint = document.getElementById('tapHint');
+    if (hint) hint.remove();
+
     const p2 = document.getElementById('pantalla2');
     document.getElementById('numFinal').textContent = num;
     p2.classList.add('show');
@@ -227,10 +244,19 @@
     const dateTimeDigits=(dia+mes+anio+h+mi).split('').filter(ch=>ch!=='0');
     const cadena=[...nameDigits,...dateTimeDigits].join('');
     const result=fullReduce(cadena);
+
+    // Número + hint “Haz clic” SOLO en pantalla 1
     document.getElementById('boton').style.display='none';
     const resultadoEl=document.getElementById('resultado');
-    resultadoEl.innerHTML=`<strong id="resultNumber">${result}</strong>`;
-    document.getElementById('instruccion').innerHTML = `Descarga la app <strong>Frequency Sound Generator</strong> en el Play Store de Google <a href="https://play.google.com/store/apps/details?id=com.luxdelux.frequencygenerator" target="_blank">aquí</a>, cambia los 440 Hz que vienen por default en la app a tu número energético, oprime el ícono de tu lado derecho que está debajo del + y selecciona <em>Square</em>. Listo, ¡Escucha tu propia frecuencia!`;
+    resultadoEl.innerHTML = `
+      <strong id="resultNumber">${result}</strong>
+      <div id="tapHint" class="hint-tap">Haz clic</div>
+    `;
+    document.getElementById('instruccion').innerHTML =
+      `Descarga la app <strong>Frequency Sound Generator</strong> en el Play Store de Google
+       <a href="https://play.google.com/store/apps/details?id=com.luxdelux.frequencygenerator" target="_blank">aquí</a>,
+       cambia los 440 Hz que vienen por default en la app a tu número energético, oprime el ícono de tu lado derecho que está debajo del + y selecciona <em>Square</em>. Listo, ¡Escucha tu propia frecuencia!`;
+
     const resNum=document.getElementById('resultNumber');
     if(resNum){ resNum.addEventListener('click',()=> showPantalla2(result)); }
   }
